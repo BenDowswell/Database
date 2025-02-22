@@ -1,20 +1,37 @@
--- Create recipes table
+-- Drop tables if they exist (for a fresh start)
+DROP TABLE IF EXISTS recipe_ingredients CASCADE;
+DROP TABLE IF EXISTS recipe_steps CASCADE;
+DROP TABLE IF EXISTS ingredients CASCADE;
+DROP TABLE IF EXISTS recipes CASCADE;
+
+-- Create the recipes table
 CREATE TABLE recipes (
     id SERIAL PRIMARY KEY,
     name TEXT NOT NULL,
-    instructions TEXT NOT NULL
+    date_added TIMESTAMP DEFAULT NOW()
 );
 
--- Create ingredients table
+-- Create the recipe_steps table
+CREATE TABLE recipe_steps (
+    id SERIAL PRIMARY KEY,
+    recipe_id INT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    step_number INT NOT NULL,
+    description TEXT NOT NULL,
+    date_added TIMESTAMP DEFAULT NOW(),
+    UNIQUE (recipe_id, step_number)
+);
+
+-- Create the ingredients table
 CREATE TABLE ingredients (
     id SERIAL PRIMARY KEY,
-    name TEXT UNIQUE NOT NULL
+    name TEXT UNIQUE NOT NULL,
+    date_added TIMESTAMP DEFAULT NOW()
 );
 
--- Create recipe_ingredients junction table
+-- Create the recipe_ingredients join table
 CREATE TABLE recipe_ingredients (
-    recipe_id INT REFERENCES recipes(id) ON DELETE CASCADE,
-    ingredient_id INT REFERENCES ingredients(id) ON DELETE CASCADE,
-    quantity TEXT, -- e.g., "1 cup", "200g"
+    recipe_id INT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    ingredient_id INT NOT NULL REFERENCES ingredients(id) ON DELETE CASCADE,
+    quantity TEXT,  -- e.g., "200g", "1 cup" - adjust as needed
     PRIMARY KEY (recipe_id, ingredient_id)
 );
