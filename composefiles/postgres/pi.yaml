@@ -1,0 +1,31 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: booking_system_db
+    environment:
+      POSTGRES_USER: dbuser
+      POSTGRES_PASSWORD: booking
+      POSTGRES_DB: booking_system
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    networks:
+      - booking_network
+
+  adminer:
+    image: adminer
+    container_name: adminer
+    ports:
+      - "8080:8080"
+    networks:
+      - booking_network
+
+volumes:
+  db_data:
+
+networks:
+  booking_network:
+    driver: bridge

@@ -1,0 +1,15 @@
+-- Insert a sample recipe
+INSERT INTO recipes (name, instructions) 
+VALUES ('Pasta Carbonara', '1. Cook pasta. 2. Mix with eggs, cheese, pancetta.');
+
+-- Insert ingredients
+INSERT INTO ingredients (name) 
+VALUES ('Pasta'), ('Eggs'), ('Cheese'), ('Pancetta');
+
+-- Link ingredients to the recipe
+INSERT INTO recipe_ingredients (recipe_id, ingredient_id, quantity)
+VALUES 
+(1, (SELECT id FROM ingredients WHERE name='Pasta'), '200g'),
+(1, (SELECT id FROM ingredients WHERE name='Eggs'), '2'),
+(1, (SELECT id FROM ingredients WHERE name='Cheese'), '50g'),
+(1, (SELECT id FROM ingredients WHERE name='Pancetta'), '100g');
