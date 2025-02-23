@@ -1,17 +1,30 @@
--- Drop tables if they exist (for a fresh start)
+-- Drop existing tables in reverse dependency order for a clean start
+DROP TABLE IF EXISTS comments CASCADE;
 DROP TABLE IF EXISTS recipe_ingredients CASCADE;
 DROP TABLE IF EXISTS recipe_steps CASCADE;
-DROP TABLE IF EXISTS ingredients CASCADE;
 DROP TABLE IF EXISTS recipes CASCADE;
+DROP TABLE IF EXISTS ingredients CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
--- Create the recipes table
-CREATE TABLE recipes (
+-- Create the users table to track app users and admins
+CREATE TABLE users (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    username TEXT UNIQUE NOT NULL,
+    email TEXT UNIQUE NOT NULL,
+    password_hash TEXT NOT NULL,
+    is_admin BOOLEAN DEFAULT FALSE,
     date_added TIMESTAMP DEFAULT NOW()
 );
 
--- Create the recipe_steps table
+-- Create the recipes table, linking each recipe to its creator (user)
+CREATE TABLE recipes (
+    id SERIAL PRIMARY KEY,
+    name TEXT NOT NULL,
+    created_by INT REFERENCES users(id) ON DELETE SET NULL,
+    date_added TIMESTAMP DEFAULT NOW()
+);
+
+-- Create the recipe_steps table to store detailed steps for each recipe
 CREATE TABLE recipe_steps (
     id SERIAL PRIMARY KEY,
     recipe_id INT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
@@ -21,17 +34,26 @@ CREATE TABLE recipe_steps (
     UNIQUE (recipe_id, step_number)
 );
 
--- Create the ingredients table
+-- Create the ingredients table to store unique ingredients
 CREATE TABLE ingredients (
     id SERIAL PRIMARY KEY,
     name TEXT UNIQUE NOT NULL,
     date_added TIMESTAMP DEFAULT NOW()
 );
 
--- Create the recipe_ingredients join table
+-- Create the recipe_ingredients join table to relate recipes with their required ingredients
 CREATE TABLE recipe_ingredients (
     recipe_id INT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
     ingredient_id INT NOT NULL REFERENCES ingredients(id) ON DELETE CASCADE,
-    quantity TEXT,  -- e.g., "200g", "1 cup" - adjust as needed
+    quantity TEXT,  -- e.g., "200g", "1 cup"
     PRIMARY KEY (recipe_id, ingredient_id)
+);
+
+-- Create the comments table to allow users to comment on recipes
+CREATE TABLE comments (
+    id SERIAL PRIMARY KEY,
+    recipe_id INT NOT NULL REFERENCES recipes(id) ON DELETE CASCADE,
+    user_id INT REFERENCES users(id) ON DELETE SET NULL,
+    comment TEXT NOT NULL,
+    date_added TIMESTAMP DEFAULT NOW()
 );
